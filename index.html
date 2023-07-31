@@ -45,7 +45,7 @@
 
  <div id="editor">
      
-# MarkShow 
+# <span   class="replace-row"       data-google-sheet-column='3'          data-google-sheet-row='2'          data-google-sheet-url='https://docs.google.com/spreadsheets/d/e/2PACX-1vSqiU1XRSWOGBeAs5weGjcPwDF3xT7YeqL8KP4YOTSF7SMqnOhYC68ziWXEpURPOGplxZFbW1Zafi39/pub?gid=0&single=true&output=csv'       >       </span> 
 ## Markdown to Slideshow
 [Donate / Support](https://www.paypal.com/paypalme/motyar/)
 
@@ -359,5 +359,213 @@ white-space: pre;
 }
 
 </style>
+    <script>
+  // Function to handle dropdown change
+  function handleDropdownChange() {
+    // Get the selected value from the dropdown list
+    const selectedRow = document.getElementById("rowSelection").value;
+
+    // Get the placeholder element with the data-google-sheet-url value
+    const placeholder = document.getElementById("googleSheetUrl");
+    const googleSheetUrl = placeholder.getAttribute("data-google-sheet-url");
+
+    // Get all elements with the class "google-sheet-data" (class used for elements with data-google-sheet-row attribute)
+    const elementsWithDataAttribute = document.getElementsByClassName("google-sheet-data");
+
+    // Loop through the elements and update the data-google-sheet-url and data-google-sheet-row attributes
+    for (const element of elementsWithDataAttribute) {
+      element.setAttribute("data-google-sheet-url", googleSheetUrl);
+      element.setAttribute("data-google-sheet-row", selectedRow);
+    }
+  }
+
+  // Attach the event listener to the dropdown list
+  document.getElementById("rowSelection").addEventListener("change", handleDropdownChange);
+
+  // Call the function initially to set the default row
+  handleDropdownChange();
+  </script>
+   <script type="text/javascript">
+        // Borrowed from https://www.bennadel.com/blog/1504-ask-ben-parsing-csv-strings-with-javascript-exec-regular-expression-command.htm and minified for copy-ability reasons
+        var CSVToArray = function CSVToArray(e,r){r=r||",";for(var n=new RegExp("(\\"+r+'|\\r?\\n|\\r|^)(?:"([^"]*(?:""[^"]*)*)"|([^"\\'+r+"\\r\\n]*))","gi"),g=[[]],l=null;l=n.exec(e);){var a=l[1];if(a.length&&a!=r&&g.push([]),l[2])p=l[2].replace(new RegExp('""',"g"),'"');else var p=l[3];g[g.length-1].push(p)}return g}      
+
+        // Loads a Google Sheet at the given url and passes the Google Sheet as 2D array
+        // into the callback function.
+        var fetchGoogleSheetAsArray = function fetchGoogleSheetAsArray(googleSheetURL, callback) {
+          var googleSheetRequest = new XMLHttpRequest();
+          googleSheetRequest.addEventListener('load', function() {
+            var rawCSVText = googleSheetRequest.responseText;
+            // Invoke the provided callback and pass a 2D array (parsed from the converted CSV)
+            // as its argument.           
+            callback(CSVToArray(rawCSVText));
+          });
+          googleSheetRequest.addEventListener('error', function() {
+            console.error('Google Sheet Replacer had trouble fetching the Google Sheet at: ' + googleSheetURL);
+          })
+          googleSheetRequest.open('GET', googleSheetURL);
+          googleSheetRequest.send();
+        }
+
+        // Searches for all elements on the DOM with a 'data-google-sheet-url' attribute, fetches
+        // that Google Sheet, and replaces the contents of the element with the contents of the cell
+        // specified by 'data-google-sheet-column' and 'data-google-sheet' row attributes.
+        var processAllGoogleSheetReplacerElements = function processAllGoogleSheetReplacerElements() {
+          googleSheetElements = document.querySelectorAll('[data-google-sheet-url]');
+          googleSheetElements.forEach(function (googleSheetElement){
+            var googleSheetURL = googleSheetElement.getAttribute('data-google-sheet-url');
+            // Parse the column and row attributes as integers
+            var googleSheetColumn = parseInt(googleSheetElement.getAttribute('data-google-sheet-column'), 10);
+            var googleSheetRow = parseInt(googleSheetElement.getAttribute('data-google-sheet-row'), 10);
+            fetchGoogleSheetAsArray(googleSheetURL, function(googleSheetArray) {
+              // The Google Sheet specified rows and columsn are one-based and the array is zero-based, so
+              // we're accounting for that below.
+              googleSheetElement.innerHTML = googleSheetArray[googleSheetRow - 1][googleSheetColumn - 1];
+            });
+          });
+        }
+
+        // Process all Google Sheet Replacer elements
+        processAllGoogleSheetReplacerElements();
+      </script>
+      <!-- GOOGLE SHEET REPLACER -- THIS IS THE END OF WHAT YOU SHOULD COPY INTO YOUR HTML-->      
+<script>
+  function updateRows() {
+    const selectedRow = document.getElementById("row-select").value;
+    const elementsToUpdate = document.querySelectorAll(".replace-row");
+    
+    elementsToUpdate.forEach((element) => {
+      element.setAttribute("data-google-sheet-row", selectedRow);
+    });
+  }
+
+  // Add an event listener to trigger the update when the dropdown changes
+  document.getElementById("row-select").addEventListener("change", updateRows);
+</script>
+<script>
+    // JavaScript to handle row selection and update data-google-sheet-row attributes
+    document.getElementById('rowSelect').addEventListener('change', function() {
+      const selectedRow = this.value;
+      const spans = document.querySelectorAll('[data-google-sheet-row]');
+      spans.forEach(span => {
+        // Update the attribute value
+        span.setAttribute('data-google-sheet-row', selectedRow);
+        
+        // Update the displayed content
+        const sheetUrl = span.dataset.googleSheetUrl;
+        const columnIndex = span.dataset.googleSheetColumn - 1; // Index starts from 0 in JS
+        fetch(sheetUrl)
+          .then(response => response.text())
+          .then(data => {
+            const rows = data.split('\n');
+            if (rows.length > selectedRow) {
+              const rowData = rows[selectedRow].split(',');
+              if (rowData.length > columnIndex) {
+                span.innerText = rowData[columnIndex];
+              } else {
+                span.innerText = 'No data available';
+              }
+            } else {
+              span.innerText = 'No data available';
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching data:', error);
+            span.innerText = 'Error fetching data';
+          });
+      });
+    });
+
+    // JavaScript to handle the reload button click
+    document.getElementById('reloadButton').addEventListener('click', function() {
+      const selectedRow = document.getElementById('rowSelect').value;
+      // Add the selected row as a query parameter to the URL
+      const urlParams = new URLSearchParams(window.location.search);
+      urlParams.set('row', selectedRow);
+      // Reload the page with the updated query parameter
+      window.location.search = urlParams.toString();
+    });
+
+    // JavaScript to read the query parameter on page load and update spans accordingly
+    window.addEventListener('DOMContentLoaded', function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const selectedRow = urlParams.get('row') || '2'; // Default to row 2 if no query parameter
+      document.getElementById('rowSelect').value = selectedRow;
+
+      const spans = document.querySelectorAll('[data-google-sheet-row]');
+      spans.forEach(span => {
+        span.setAttribute('data-google-sheet-row', selectedRow);
+        // ... update the displayed content similar to the change event handler ...
+      });
+    });
+  </script>
+  <!-- Script to handle the dropdown change and the button click -->
+<script>
+  // Function to handle dropdown change
+  function handleDropdownChange() {
+    // Get the selected value from the dropdown list
+    const selectedRow = document.getElementById("rowSelection").value;
+
+    // Get the placeholder element with the data-google-sheet-url value
+    const placeholder = document.getElementById("googleSheetUrl");
+    const googleSheetUrl = placeholder.getAttribute("data-google-sheet-url");
+
+    // Get all elements with the class "google-sheet-data" (class used for elements with data-google-sheet-row attribute)
+    const elementsWithDataAttribute = document.getElementsByClassName("google-sheet-data");
+
+    // Loop through the elements and update the data-google-sheet-url and data-google-sheet-row attributes
+    for (const element of elementsWithDataAttribute) {
+      element.setAttribute("data-google-sheet-url", googleSheetUrl);
+      element.setAttribute("data-google-sheet-row", selectedRow);
+    }
+  }
+
+  // Function to handle the button click
+  function handleApplyButtonClick() {
+    handleDropdownChange(); // Call the function to update the rows
+    alert("Rows updated successfully!"); // Show an alert or perform any other action to indicate the update
+  }
+
+  // Attach the event listener to the dropdown list
+  document.getElementById("rowSelection").addEventListener("change", handleDropdownChange);
+
+  // Attach the event listener to the button
+  document.getElementById("applyButton").addEventListener("click", handleApplyButtonClick);
+
+  // Call the function initially to set the default row
+  handleDropdownChange();
+</script>
+ <script>
+    // Function to convert text links to hyperlinks with "View Source" as link text
+    function convertTextLinksToHyperlinks() {
+      const textLinks = document.getElementsByClassName("text-link");
+      for (const textLink of textLinks) {
+        const linkText = textLink.textContent;
+        const hyperlink = document.createElement("a");
+        hyperlink.href = "https://www"; // Set the href to "#" for now; you can change it to the actual URL.
+        hyperlink.textContent = "View Source";
+        textLink.parentNode.replaceChild(hyperlink, textLink);
+      }
+    }
+
+    // Call the function to convert text links to hyperlinks
+    convertTextLinksToHyperlinks();
+  </script>
+    <script>
+    document.getElementById("exportButton").addEventListener("click", function () {
+      // Create a new jsPDF instance
+      const doc = new jsPDF();
+
+      // Get the HTML content of the entire page
+      const htmlContent = document.body;
+
+      // Convert HTML to PDF using html2pdf method of jsPDF
+      doc.html(htmlContent, {
+        callback: function (pdf) {
+          // Save the PDF with a file name
+          pdf.save("exported_page.pdf");
+        },
+      });
+    });
+  </script>
     </body>
 </html>
