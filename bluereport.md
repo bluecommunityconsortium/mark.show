@@ -1,3 +1,49 @@
+---
+# Configurations
+# black, white, league, beige, sky, simple, serif, night, moon, solarized
+theme: night
+# cube, page, concave, zoom, linear, fade, none, default 
+transition: slide
+#  Syntax highlighting style https://highlightjs.org/static/demo/
+highlight: solarized-dark
+backgroundTransition: zoom
+progress: true
+controls: true
+hideAddressBar: true
+
+# Editor settings
+editor:
+    fontSize: 14
+    theme: solarized_light
+    # keybinding: vim
+---
+# MarkShow 
+## Markdown to Slideshow
+
+Powered by Reveal.js 
+
+
+#### feedback is welcomed at
+<a href="http://twitter.com/bluecommfl" target="_blank" data-preview-link="false" >@motyar</a> on Twitter
+
+---
+# Custom styling
+You also can override the theme style, check any [theme source](https://mark.show/reveal.js@4.0.2/dist/theme/simple.css) for more info
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@800&display=swap');
+.slide { color:#116466; background: #2c3531;}
+.slide h1{ color: #ffcb9a; font-family: 'Playfair Display', serif; }
+.reveal p { color: #d1e8e2;}
+.reveal li{ color: #d1e8e2;}
+.reveal a { color: #89b08c; }
+.reveal .controls { color: #0a97b0; }
+.reveal .progress { color: #1b6ca8; }
+</style>
+
+---
+
+
 ## Blue Community Assessment
 
 **<<**📇**About Section>>**
