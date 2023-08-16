@@ -96,7 +96,7 @@ This will only display in the notes window.
 
 # Use tables 
 
-| Tables        | Are           | Cool  | 
+| Tourism        | Is           | Cool  | 
 | ------------- |:-------------:| -----:|
 | col 3 is      | right-aligned | $1600 |
 | col 2 is      | centered      |   $12 |
